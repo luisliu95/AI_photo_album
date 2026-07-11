@@ -14,6 +14,8 @@ object Routes{
     const val HOME="home";const val PICKER="picker";const val SETTINGS="settings";const val PROCESSING="processing";const val EDITOR="editor"
     const val MUSIC="music";const val CAPTIONS="captions";const val RESULT="result";const val EXPORT="export";const val LIVE="live";const val LIVE_DETAIL="liveDetail"
     const val COVER="cover";const val TASKS="tasks";const val PROFILE="profile";const val AI_CHAT="aiChat";const val VERSIONS="versions"
+    const val ONBOARDING="onboarding";const val HIGHLIGHTS="highlights"
+    const val STUDIO="studio"
 }
 
 @Composable fun MomentsApp(vm:MomentsViewModel=viewModel(),nav:NavHostController=rememberNavController()){
@@ -35,6 +37,9 @@ object Routes{
             composable(Routes.PROFILE){PreferenceScreen(vm,nav)}
             composable(Routes.AI_CHAT){AiChatScreen(nav)}
             composable(Routes.VERSIONS){VersionScreen(vm,nav)}
+            composable(Routes.ONBOARDING){AssistantOnboardingScreen(vm,nav)}
+            composable(Routes.HIGHLIGHTS){HighlightAggregationScreen(vm,nav)}
+            composable(Routes.STUDIO){AiStudioHomeScreen(vm,nav)}
         }
     }
 }

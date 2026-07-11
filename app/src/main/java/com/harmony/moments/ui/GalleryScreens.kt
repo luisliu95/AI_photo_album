@@ -27,15 +27,15 @@ import com.harmony.moments.R
 @Composable fun GalleryScreen(vm:MomentsViewModel,nav:NavHostController){
     var permission by remember{mutableStateOf(false)}
     Box(Modifier.fillMaxSize().background(Color.White)){
-        LazyColumn(contentPadding=PaddingValues(bottom=82.dp)){
-            item{Row(Modifier.fillMaxWidth().statusBarsPadding().height(52.dp).padding(horizontal=12.dp),verticalAlignment=Alignment.CenterVertically){Icon(Icons.Outlined.Menu,null,Modifier.size(18.dp));Text("Gallery",Modifier.padding(start=12.dp).weight(1f),fontWeight=FontWeight.SemiBold);IconButton({}){Icon(Icons.Outlined.Search,null)};IconButton({nav.go(Routes.PROFILE)}){Icon(Icons.Outlined.MoreVert,null)}}}
-            item{HighlightCard{if(vm.permissionGranted){if(vm.preferenceDone)nav.go(Routes.PICKER)else nav.go(Routes.PROFILE)}else permission=true}}
+        LazyColumn(contentPadding=PaddingValues(bottom=24.dp),modifier=Modifier.navigationBarsPadding()){
+            item{Row(Modifier.fillMaxWidth().statusBarsPadding().height(52.dp).padding(horizontal=12.dp),verticalAlignment=Alignment.CenterVertically){Icon(Icons.Outlined.Menu,null,Modifier.size(18.dp));Text("Gallery",Modifier.padding(start=12.dp).weight(1f),fontWeight=FontWeight.SemiBold);IconButton({}){Icon(Icons.Outlined.Search,null)};IconButton({}){Icon(Icons.Outlined.MoreVert,null)}}}
+            if(vm.showNextDayReminder)item{NextDayReminderCard{nav.go(Routes.HIGHLIGHTS)}}
             item{Text("Today",Modifier.padding(16.dp,14.dp,16.dp,8.dp),fontWeight=FontWeight.SemiBold)}
             item{GalleryGrid(mediaItems.filter{it.day=="Today"})}
             item{Text("Yesterday",Modifier.padding(16.dp,14.dp,16.dp,8.dp),fontWeight=FontWeight.SemiBold)}
             item{GalleryGrid(mediaItems.filter{it.day=="Yesterday"})}
         }
-        GalleryNav(Modifier.align(Alignment.BottomCenter),nav)
+        HighlightAssistantOverlay(vm,Modifier.align(Alignment.CenterEnd),onLearnMore={vm.assistantExpanded=false;vm.onboardingStep=0;nav.go(Routes.ONBOARDING)})
         if(permission)PrivacySheet(onDismiss={permission=false},onAccept={vm.permissionGranted=true;permission=false;if(vm.preferenceDone)nav.go(Routes.PICKER)else nav.go(Routes.PROFILE)})
     }
 }
@@ -56,12 +56,6 @@ import com.harmony.moments.R
 @Composable private fun GalleryGrid(items:List<MediaItem>){
     val columns=items.chunked(2)
     Column(Modifier.padding(horizontal=16.dp),verticalArrangement=Arrangement.spacedBy(4.dp)){columns.forEachIndexed{row,pair->Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(4.dp)){pair.forEachIndexed{i,m->MediaImage(m.res,Modifier.weight(1f).height(if((row+i)%2==0)150.dp else 116.dp));};if(pair.size==1)Spacer(Modifier.weight(1f))}}}
-}
-
-@Composable private fun GalleryNav(mod:Modifier,nav:NavHostController){
-    Row(mod.fillMaxWidth().background(Color.White.copy(.97f)).navigationBarsPadding().height(62.dp),horizontalArrangement=Arrangement.SpaceAround,verticalAlignment=Alignment.CenterVertically){
-        ToolNavItem(Icons.Outlined.AutoAwesome,"时刻",true){nav.go(Routes.HOME)};ToolNavItem(Icons.Outlined.PhotoLibrary,"相册"){nav.go(Routes.PICKER)};ToolNavItem(Icons.Outlined.TextFields,"文字"){};ToolNavItem(Icons.Outlined.MusicNote,"音乐"){nav.go(Routes.LIVE)}
-    }
 }
 
 @Composable private fun PrivacySheet(onDismiss:()->Unit,onAccept:()->Unit){

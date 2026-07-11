@@ -30,6 +30,16 @@ class MomentsViewModel:ViewModel(){
     var editorVersion by mutableIntStateOf(3)
     var taskProgress by mutableIntStateOf(67)
     var chosenMusic by mutableStateOf("午夜都市节奏")
+    var assistantExpanded by mutableStateOf(false)
+    var onboardingStep by mutableIntStateOf(0)
+    var highlightAssistantEnabled by mutableStateOf(false)
+    var showNextDayReminder by mutableStateOf(false)
+    var cloudAssist by mutableStateOf(true)
+    var autoAtNight by mutableStateOf(true)
+    var onlyWhenCharging by mutableStateOf(true)
+    var reviewRange by mutableStateOf("最近 3 天")
+    var reminderTime by mutableStateOf("12:00")
+    val creationDirections=mutableStateListOf<String>()
     val captions=mutableStateListOf(
         CaptionLine("00:00","欢迎来到我的山野旅行，今天我们将深入探索这片宁静的森林。"),
         CaptionLine("00:12","当金色阳光穿过树梢，我们遇见了旅途中最动人的风景。"),
