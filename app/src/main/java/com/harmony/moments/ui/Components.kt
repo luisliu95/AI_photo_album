@@ -11,6 +11,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.MoreVert
+import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -24,6 +25,24 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import android.content.Intent
+import androidx.compose.ui.platform.LocalContext
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable fun ShareBottomSheet(show:Boolean,onDismiss:()->Unit,shareText:String="我的 AI 高光作品"){
+    val context=LocalContext.current
+    if(show)ModalBottomSheet(onDismissRequest=onDismiss,shape=RoundedCornerShape(topStart=28.dp,topEnd=28.dp)){
+        Text("分享到",Modifier.padding(20.dp),fontWeight=FontWeight.Bold,fontSize=18.sp)
+        listOf("小红书","抖音","B站","微信").forEach{platform->
+            ListItem(headlineContent={Text(platform)},leadingContent={Icon(Icons.Outlined.Share,null,tint=HarmonyBlue)},modifier=Modifier.clickable{
+                val send=Intent(Intent.ACTION_SEND).apply{type="text/plain";putExtra(Intent.EXTRA_TEXT,"$shareText · $platform")}
+                context.startActivity(Intent.createChooser(send,"分享作品"))
+                onDismiss()
+            })
+        }
+        Spacer(Modifier.navigationBarsPadding())
+    }
+}
 
 @Composable fun TopBar(title:String,back:(()->Unit)?=null,menu:(()->Unit)?={}){
     Row(Modifier.fillMaxWidth().statusBarsPadding().height(54.dp).padding(horizontal=8.dp),verticalAlignment=Alignment.CenterVertically){
@@ -37,8 +56,8 @@ import androidx.compose.ui.unit.sp
     Image(painterResource(res),null,modifier.clip(RoundedCornerShape(SmallRadius)),contentScale=contentScale)
 }
 
-@Composable fun BlueButton(text:String,onClick:()->Unit,modifier:Modifier=Modifier){
-    Button(onClick,modifier.height(48.dp),shape=CircleShape,colors=ButtonDefaults.buttonColors(containerColor=HarmonyBlue)){Text(text,fontWeight=FontWeight.SemiBold)}
+@Composable fun BlueButton(text:String,onClick:()->Unit,modifier:Modifier=Modifier,enabled:Boolean=true){
+    Button(onClick,modifier.height(48.dp),shape=CircleShape,enabled=enabled,colors=ButtonDefaults.buttonColors(containerColor=HarmonyBlue)){Text(text,fontWeight=FontWeight.SemiBold)}
 }
 
 @Composable fun OutlinePill(text:String,onClick:()->Unit,modifier:Modifier=Modifier){
@@ -51,10 +70,10 @@ import androidx.compose.ui.unit.sp
     }
 }
 
-@Composable fun ToolNavItem(icon:ImageVector,label:String,selected:Boolean=false,onClick:()->Unit){
-    Column(Modifier.width(66.dp).clickable{onClick()}.padding(vertical=7.dp),horizontalAlignment=Alignment.CenterHorizontally){
-        Box(Modifier.size(36.dp).then(if(selected)Modifier.background(HarmonyBlue,CircleShape) else Modifier),contentAlignment=Alignment.Center){Icon(icon,null,tint=if(selected)Color.White else Ink,modifier=Modifier.size(20.dp))}
-        Text(label,fontSize=10.sp,color=if(selected)HarmonyBlue else Ink)
+@Composable fun ToolNavItem(icon:ImageVector,label:String,selected:Boolean=false,accent:Boolean=false,onClick:()->Unit){
+    Column(Modifier.widthIn(min=if(accent)76.dp else 72.dp).clickable{onClick()}.padding(vertical=8.dp,horizontal=2.dp),horizontalAlignment=Alignment.CenterHorizontally){
+        Box(Modifier.size(if(accent)42.dp else 36.dp).then(if(selected||accent)Modifier.background(HarmonyBlue,CircleShape) else Modifier),contentAlignment=Alignment.Center){Icon(icon,null,tint=if(selected||accent)Color.White else Ink,modifier=Modifier.size(if(accent)22.dp else 20.dp))}
+        Text(label,fontSize=if(accent)11.sp else 10.sp,fontWeight=if(accent)FontWeight.Bold else FontWeight.Normal,color=if(selected||accent)HarmonyBlue else Ink,maxLines=1)
     }
 }
 
