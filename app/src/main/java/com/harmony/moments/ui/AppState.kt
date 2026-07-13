@@ -20,12 +20,18 @@ val mediaItems=listOf(
     MediaItem(9,R.drawable.stitch_media_01,"Yesterday",true,"0:38","夏日旅行"),
 )
 
+fun formatVideoDuration(seconds:Int):String=if(seconds<60)"${seconds}秒" else "${seconds/60}:${String.format("%02d",seconds%60)}"
+fun formatVideoClock(seconds:Int):String=String.format("%02d:%02d",seconds/60,seconds%60)
+
+/** 演示包默认开启：预填状态、加快分析、显示快捷入口。正式版改为 false。 */
+const val DemoMode=true
+
 class MomentsViewModel:ViewModel(){
-    val selected=mutableStateListOf(1,2,3)
+    val selected=mutableStateListOf<Int>()
     var permissionGranted by mutableStateOf(false)
     var preferenceDone by mutableStateOf(false)
     var processing by mutableFloatStateOf(.64f)
-    var mediaFilter by mutableStateOf("All Media")
+    var mediaFilter by mutableStateOf("全部素材")
     var liveFilter by mutableStateOf("全部 (42)")
     var editorVersion by mutableIntStateOf(3)
     var taskProgress by mutableIntStateOf(67)
@@ -40,7 +46,11 @@ class MomentsViewModel:ViewModel(){
     var reviewRange by mutableStateOf("最近 3 天")
     var reminderTime by mutableStateOf("12:00")
     var videoLengthPref by mutableIntStateOf(15)
+    var rhythmPref by mutableStateOf("叙事感")
+    var stylePref by mutableStateOf("电影感")
+    var moodPref by mutableStateOf("舒缓")
     var processingNavigated by mutableStateOf(false)
+    var processingSession by mutableIntStateOf(0)
     val creationDirections=mutableStateListOf<String>()
     val captions=mutableStateListOf(
         CaptionLine("00:00","欢迎来到我的山野旅行，今天我们将深入探索这片宁静的森林。"),
@@ -48,4 +58,19 @@ class MomentsViewModel:ViewModel(){
         CaptionLine("00:24","记录每一个真实瞬间，让回忆在画面里继续流动。"),
     )
     fun toggle(id:Int){if(id in selected)selected.remove(id) else selected.add(id)}
+    fun estimatedSeconds():Int=videoLengthPref
+    fun exportFileName():String="周末旅行高光_${videoLengthPref}s.mp4"
+    fun preferenceSummary():String{
+        val dirs=if(creationDirections.isEmpty())"旅行 Vlog" else creationDirections.take(2).joinToString(" · ")
+        return "$dirs · ${formatVideoDuration(videoLengthPref)} · $stylePref · 提醒 $reminderTime"
+    }
+    fun beginProcessing(){processingSession++;processing=.02f;processingNavigated=false}
+    fun cancelProcessing(){processing=0f;processingNavigated=true}
+    fun applyDemoPresentationState(){
+        permissionGranted=true;preferenceDone=true;highlightAssistantEnabled=true;showNextDayReminder=true
+        videoLengthPref=8;rhythmPref="叙事感";stylePref="电影感";moodPref="舒缓";reminderTime="20:00";reviewRange="最近 7 天"
+        if(creationDirections.isEmpty())creationDirections.addAll(listOf("旅行 Vlog","日常回忆"))
+        processing=0f;processingNavigated=true;assistantExpanded=false;taskProgress=100;mediaFilter="全部素材"
+    }
+    init{if(DemoMode)applyDemoPresentationState()}
 }

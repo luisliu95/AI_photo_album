@@ -28,8 +28,8 @@ object Routes{
             composable(Routes.EDITOR){EditorScreen(vm,nav)}
             composable(Routes.MUSIC){MusicScreen(vm,nav)}
             composable(Routes.CAPTIONS){CaptionsScreen(vm,nav)}
-            composable(Routes.RESULT){ResultScreen(nav)}
-            composable(Routes.EXPORT){ExportScreen(nav)}
+            composable(Routes.RESULT){ResultScreen(vm,nav)}
+            composable(Routes.EXPORT){ExportScreen(vm,nav)}
             composable(Routes.LIVE){LiveAlbumScreen(vm,nav)}
             composable(Routes.LIVE_DETAIL){LiveDetailScreen(nav)}
             composable(Routes.COVER){CoverScreen(nav)}

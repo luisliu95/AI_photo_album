@@ -17,14 +17,30 @@
 
 AI、视频编码与相册写入使用本地 UI 状态模拟。
 
+## 推荐 Demo 路径（约 5 分钟）
+
+1. **相册首页** → 点击右侧 AI 小精灵 → 完成引导（选创作方向、提醒时间）
+2. **AI 高光助手** → 「开始 AI 创作」→ 选择素材 → 创作设置（调整视频长度）
+3. **AI 分析** → 等待完成 → **AI 视频剪辑**（预览、时间轴、版本切换）
+4. **导出** → 分享作品 → **作品中心** 查看任务
+
 ## 运行
 
 1. 使用 Android Studio 打开本目录。
 2. 选择 API 35 模拟器或 Android 8.0 以上真机。
 3. 运行 `app`。
 
-命令行构建：
+命令行构建（Linux / macOS / Git Bash）：
 
 ```bash
-JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" ./gradlew assembleDebug
+./gradlew assembleDebug
 ```
+
+云端打包：推送代码到 GitHub 后，在 **Actions → Build APK** 手动运行，从 Artifacts 下载 `app-debug.apk`。
+
+**演示说明**：见 [DEMO.md](DEMO.md)（含 2 分钟 / 5 分钟演示路线与话术）。
+
+## 分支说明
+
+- `main`：主分支
+- `m1`：当前 demo 优化分支（含 UI bug 修复与 GitHub Actions 打包）

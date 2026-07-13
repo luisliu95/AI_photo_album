@@ -27,6 +27,8 @@ val CardRadius = 24.dp
 val SmallRadius = 14.dp
 val PageMargin = 16.dp
 
+const val EditorScreenTitle = "AI 视频剪辑"
+
 private val Vietnam = FontFamily(
     Font(R.font.be_vietnam_pro, FontWeight.Normal),
     Font(R.font.be_vietnam_pro, FontWeight.Medium),
