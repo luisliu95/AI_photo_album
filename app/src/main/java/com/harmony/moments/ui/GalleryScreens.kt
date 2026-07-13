@@ -63,10 +63,11 @@ import com.harmony.moments.R
 }
 
 @Composable fun PickerScreen(vm:MomentsViewModel,nav:NavHostController){
-    val filters=listOf("All Media","Videos","Photos","Albums")
+    val filters=listOf("All Media","Videos","Photos","Albums");var showMenu by remember{mutableStateOf(false)}
     Box(Modifier.fillMaxSize().background(Color.White)){
-        Column{TopBar("AI Video Editor",{nav.popBackStack()});LazyRow(Modifier.padding(horizontal=12.dp),horizontalArrangement=Arrangement.spacedBy(8.dp)){items(filters){SelectPill(it,vm.mediaFilter==it){vm.mediaFilter=it}}};LazyColumn(Modifier.weight(1f),contentPadding=PaddingValues(top=12.dp,bottom=132.dp)){listOf("Today","Yesterday").forEach{day->item{Text(day,Modifier.padding(16.dp,10.dp,16.dp,6.dp),fontWeight=FontWeight.SemiBold)};item{PickerGrid(mediaItems.filter{m->m.day==day&&(vm.mediaFilter=="All Media"||vm.mediaFilter=="Albums"||(vm.mediaFilter=="Videos"&&m.video)||(vm.mediaFilter=="Photos"&&!m.video))},vm)}}}}
-        SelectedTray(vm,Modifier.align(Alignment.BottomCenter)){nav.go(Routes.SETTINGS)}
+        Column{TopBar("AI 创作",{nav.popBackStack()},menu={showMenu=true});LazyRow(Modifier.padding(horizontal=12.dp),horizontalArrangement=Arrangement.spacedBy(8.dp)){items(filters){SelectPill(it,vm.mediaFilter==it){vm.mediaFilter=it}}};LazyColumn(Modifier.weight(1f),contentPadding=PaddingValues(top=12.dp,bottom=132.dp)){listOf("Today","Yesterday").forEach{day->item{Text(day,Modifier.padding(16.dp,10.dp,16.dp,6.dp),fontWeight=FontWeight.SemiBold)};item{PickerGrid(mediaItems.filter{m->m.day==day&&(vm.mediaFilter=="All Media"||vm.mediaFilter=="Albums"||(vm.mediaFilter=="Videos"&&m.video)||(vm.mediaFilter=="Photos"&&!m.video))},vm)}}}}
+        SelectedTray(vm,Modifier.align(Alignment.BottomCenter)){if(vm.selected.isNotEmpty())nav.go(Routes.SETTINGS) else {}}
+        if(showMenu)AlertDialog({showMenu=false},title={Text("更多操作")},text={Text("选择要进行的操作")},confirmButton={TextButton({showMenu=false;nav.go(Routes.SETTINGS)}){Text("创作设置")}},dismissButton={TextButton({showMenu=false;nav.go(Routes.PROFILE)}){Text("创作偏好")}})
     }
 }
 
@@ -76,6 +77,6 @@ import com.harmony.moments.R
 
 @Composable private fun SelectedTray(vm:MomentsViewModel,mod:Modifier,next:()->Unit){
     Card(mod.padding(12.dp).fillMaxWidth(),shape=RoundedCornerShape(24.dp),colors=CardDefaults.cardColors(Color.White),elevation=CardDefaults.cardElevation(10.dp)){
-        Row(Modifier.padding(12.dp),verticalAlignment=Alignment.CenterVertically){Column(Modifier.weight(1f)){Text("已选择 ${vm.selected.size} 项",fontWeight=FontWeight.Bold);Text("✦ 预计生成 ${vm.selected.size*12} 秒",color=Muted,fontSize=10.sp);LazyRow(Modifier.padding(top=6.dp),horizontalArrangement=Arrangement.spacedBy(4.dp)){items(vm.selected){id->MediaImage(mediaItems.first{it.id==id}.res,Modifier.size(34.dp))}}};BlueButton("下一步  →",next)}
+        Row(Modifier.padding(12.dp),verticalAlignment=Alignment.CenterVertically){Column(Modifier.weight(1f)){Text("已选择 ${vm.selected.size} 项",fontWeight=FontWeight.Bold);Text("✦ 预计生成 ${vm.selected.size*12} 秒",color=Muted,fontSize=10.sp);LazyRow(Modifier.padding(top=6.dp),horizontalArrangement=Arrangement.spacedBy(4.dp)){items(vm.selected){id->MediaImage(mediaItems.first{it.id==id}.res,Modifier.size(34.dp))}}};BlueButton(if(vm.selected.isEmpty())"请先选择素材" else "下一步  →",next,enabled=vm.selected.isNotEmpty())}
     }
 }

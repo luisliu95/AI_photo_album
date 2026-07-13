@@ -39,6 +39,8 @@ class MomentsViewModel:ViewModel(){
     var onlyWhenCharging by mutableStateOf(true)
     var reviewRange by mutableStateOf("最近 3 天")
     var reminderTime by mutableStateOf("12:00")
+    var videoLengthPref by mutableIntStateOf(15)
+    var processingNavigated by mutableStateOf(false)
     val creationDirections=mutableStateListOf<String>()
     val captions=mutableStateListOf(
         CaptionLine("00:00","欢迎来到我的山野旅行，今天我们将深入探索这片宁静的森林。"),

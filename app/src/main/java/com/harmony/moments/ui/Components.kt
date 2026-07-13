@@ -37,8 +37,8 @@ import androidx.compose.ui.unit.sp
     Image(painterResource(res),null,modifier.clip(RoundedCornerShape(SmallRadius)),contentScale=contentScale)
 }
 
-@Composable fun BlueButton(text:String,onClick:()->Unit,modifier:Modifier=Modifier){
-    Button(onClick,modifier.height(48.dp),shape=CircleShape,colors=ButtonDefaults.buttonColors(containerColor=HarmonyBlue)){Text(text,fontWeight=FontWeight.SemiBold)}
+@Composable fun BlueButton(text:String,onClick:()->Unit,modifier:Modifier=Modifier,enabled:Boolean=true){
+    Button(onClick,modifier.height(48.dp),shape=CircleShape,enabled=enabled,colors=ButtonDefaults.buttonColors(containerColor=HarmonyBlue)){Text(text,fontWeight=FontWeight.SemiBold)}
 }
 
 @Composable fun OutlinePill(text:String,onClick:()->Unit,modifier:Modifier=Modifier){
@@ -52,9 +52,9 @@ import androidx.compose.ui.unit.sp
 }
 
 @Composable fun ToolNavItem(icon:ImageVector,label:String,selected:Boolean=false,onClick:()->Unit){
-    Column(Modifier.width(66.dp).clickable{onClick()}.padding(vertical=7.dp),horizontalAlignment=Alignment.CenterHorizontally){
+    Column(Modifier.widthIn(min=72.dp).clickable{onClick()}.padding(vertical=8.dp,horizontal=2.dp),horizontalAlignment=Alignment.CenterHorizontally){
         Box(Modifier.size(36.dp).then(if(selected)Modifier.background(HarmonyBlue,CircleShape) else Modifier),contentAlignment=Alignment.Center){Icon(icon,null,tint=if(selected)Color.White else Ink,modifier=Modifier.size(20.dp))}
-        Text(label,fontSize=10.sp,color=if(selected)HarmonyBlue else Ink)
+        Text(label,fontSize=10.sp,color=if(selected)HarmonyBlue else Ink,maxLines=1)
     }
 }
 
