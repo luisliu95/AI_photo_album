@@ -17,6 +17,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -45,19 +46,20 @@ import com.harmony.moments.R
             Row(verticalAlignment=Alignment.CenterVertically){Text("时间轴结构",Modifier.weight(1f),fontWeight=FontWeight.Bold);Text("拖动调整",color=Muted,fontSize=10.sp)}
             Row(Modifier.padding(top=14.dp),horizontalArrangement=Arrangement.spacedBy(8.dp)){
                 order.forEachIndexed{i,m->
-                    Column(Modifier.width(72.dp).draggable(orientation=Orientation.Horizontal,state=rememberDraggableState{delta->val id=dragId?:return@rememberDraggableState;dragX+=delta;val cur=order.indexOfFirst{it.id==id};if(cur<0)return@rememberDraggableState;val next=order.toMutableList();if(dragX>70f&&cur<next.lastIndex){next.add(cur+1,next.removeAt(cur));order=next;dragX-=70f}else if(dragX<-70f&&cur>0){next.add(cur-1,next.removeAt(cur));order=next;dragX+=70f}},onDragStarted={dragId=m.id;dragX=0f},onDragStopped={dragId=null})){
-                        Box(Modifier.fillMaxWidth().height(82.dp)){MediaImage(m.res,Modifier.fillMaxSize());Box(Modifier.padding(5.dp).size(20.dp).background(Color.White,CircleShape),contentAlignment=Alignment.Center){Text("${i+1}",fontSize=9.sp)};Text(roles[i],fontSize=9.sp,maxLines=1)}
+                    val dragging=dragId==m.id
+                    Column(Modifier.width(72.dp).graphicsLayer{scaleX=if(dragging)1.12f else 1f;scaleY=if(dragging)1.12f else 1f;translationX=if(dragging)dragX else 0f;shadowElevation=if(dragging)10.dp.toPx() else 0f}.draggable(orientation=Orientation.Horizontal,state=rememberDraggableState{delta->val id=dragId?:return@rememberDraggableState;dragX+=delta;val cur=order.indexOfFirst{it.id==id};if(cur<0)return@rememberDraggableState;val next=order.toMutableList();if(dragX>70f&&cur<next.lastIndex){next.add(cur+1,next.removeAt(cur));order=next;dragX-=70f}else if(dragX<-70f&&cur>0){next.add(cur-1,next.removeAt(cur));order=next;dragX+=70f}},onDragStarted={dragId=m.id;dragX=0f},onDragStopped={dragId=null})){
+                        Box(Modifier.fillMaxWidth().height(82.dp).clip(RoundedCornerShape(10.dp))){MediaImage(m.res,Modifier.fillMaxSize());Box(Modifier.align(Alignment.TopStart).padding(5.dp).size(20.dp).background(Color.White,CircleShape),contentAlignment=Alignment.Center){Text("${i+1}",fontSize=9.sp)};Text(roles[i],Modifier.align(Alignment.BottomEnd).padding(5.dp),Color.White,fontSize=9.sp,fontWeight=FontWeight.Bold,maxLines=1)}
                     }
                 }
             }
             Slider(timeline,{timeline=it},modifier=Modifier.padding(top=8.dp).height(24.dp))
         }
         BlueButton("下一步  →",{nav.go(Routes.RESULT)},Modifier.padding(16.dp).fillMaxWidth())
-        Spacer(Modifier.weight(1f));EditorBar(nav)
+        Spacer(Modifier.weight(1f));EditorBar(nav,Routes.EDITOR)
     }
 }
 
-@Composable private fun EditorBar(nav:NavHostController){Row(Modifier.fillMaxWidth().background(Color.White).border(1.dp,Hairline).navigationBarsPadding().padding(vertical=6.dp,horizontal=4.dp),horizontalArrangement=Arrangement.SpaceEvenly){ToolNavItem(Icons.Outlined.AutoAwesome,"特效"){nav.go(Routes.AI_CHAT)};ToolNavItem(Icons.Outlined.Movie,"剪辑",true){};ToolNavItem(Icons.Outlined.TextFields,"文字"){nav.go(Routes.CAPTIONS)};ToolNavItem(Icons.Outlined.MusicNote,"音频"){nav.go(Routes.MUSIC)}}}
+@Composable private fun EditorBar(nav:NavHostController,current:String){Row(Modifier.fillMaxWidth().background(Color.White).border(1.dp,Hairline).navigationBarsPadding().padding(vertical=6.dp),horizontalArrangement=Arrangement.SpaceEvenly){ToolNavItem(Icons.Outlined.AutoAwesome,"特效",selected=current==Routes.AI_CHAT){nav.go(Routes.AI_CHAT)};ToolNavItem(Icons.Outlined.Movie,"剪辑",selected=current==Routes.EDITOR){nav.go(Routes.EDITOR)};Box(Modifier.size(46.dp).background(AiViolet,CircleShape),contentAlignment=Alignment.Center){IconButton({nav.go(Routes.EXPORT)},Modifier.size(46.dp)){Icon(Icons.Outlined.ArrowForward,null,Modifier.size(24.dp),Color.White)}};ToolNavItem(Icons.Outlined.TextFields,"文字",selected=current==Routes.CAPTIONS){nav.go(Routes.CAPTIONS)};ToolNavItem(Icons.Outlined.MusicNote,"音频",selected=current==Routes.MUSIC){nav.go(Routes.MUSIC)}}}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable fun MusicScreen(vm:MomentsViewModel,nav:NavHostController){
@@ -65,7 +67,7 @@ import com.harmony.moments.R
     Column(Modifier.fillMaxSize().background(Canvas)){TopBar(EditorScreenTitle,{nav.popBackStack()});Box(Modifier.padding(16.dp).fillMaxWidth().height(205.dp).clip(RoundedCornerShape(20.dp))){MediaImage(R.drawable.stitch_media_04,Modifier.fillMaxSize());Row(Modifier.align(Alignment.Center).background(Color.White.copy(.9f),CircleShape),verticalAlignment=Alignment.CenterVertically){IconButton({}){Icon(Icons.Outlined.FastRewind,null)};IconButton({playing=!playing},Modifier.background(HarmonyBlue,CircleShape)){Icon(if(playing)Icons.Outlined.Pause else Icons.Outlined.PlayArrow,null,tint=Color.White)};IconButton({}){Icon(Icons.Outlined.FastForward,null)}}}
         InfoCard(Modifier.padding(horizontal=16.dp).fillMaxWidth()){Row(verticalAlignment=Alignment.CenterVertically){Box(Modifier.size(38.dp).background(HarmonyBlue,RoundedCornerShape(10.dp)),contentAlignment=Alignment.Center){Icon(Icons.Outlined.MusicNote,null,tint=Color.White)};Column(Modifier.padding(horizontal=10.dp).weight(1f)){Text(vm.chosenMusic,fontWeight=FontWeight.Bold);Text("午夜都市节奏 · AI 自动卡点",color=Muted,fontSize=10.sp)};TextButton({showMusic=true}){Text("换曲")}};BeatWave();Button({},modifier=Modifier.fillMaxWidth(),shape=CircleShape,colors=ButtonDefaults.buttonColors(containerColor=AiViolet)){Icon(Icons.Outlined.AutoAwesome,null);Text("  重新卡点")}}
         InfoCard(Modifier.padding(16.dp).fillMaxWidth()){Text("音频混音",fontWeight=FontWeight.Bold);VolumeLine("视频原声",vocal){vocal=it};VolumeLine("背景音乐",music){music=it}}
-        Spacer(Modifier.weight(1f));EditorBar(nav)
+        Spacer(Modifier.weight(1f));EditorBar(nav,Routes.MUSIC)
     }
     if(showMusic)ModalBottomSheet({showMusic=false},shape=RoundedCornerShape(topStart=28.dp,topEnd=28.dp)){Text("选择音乐",Modifier.padding(20.dp),fontWeight=FontWeight.Bold,fontSize=18.sp);listOf("午夜都市节奏","风经过山谷","夏日公路","温柔时光").forEach{song->ListItem(headlineContent={Text(song)},supportingContent={Text("AI 推荐 · 02:38")},leadingContent={Icon(Icons.Outlined.MusicNote,null)},trailingContent={RadioButton(song==vm.chosenMusic,{vm.chosenMusic=song;showMusic=false})},modifier=Modifier.clickable{vm.chosenMusic=song;showMusic=false})};Spacer(Modifier.navigationBarsPadding())}
 }
@@ -82,7 +84,7 @@ import com.harmony.moments.R
             item{LazyRow(Modifier.padding(16.dp),horizontalArrangement=Arrangement.spacedBy(8.dp)){items(4){i->AssistChip({},label={Text(listOf("智能断句","去除语气词","翻译","样式")[i],fontSize=10.sp)},leadingIcon={Icon(listOf(Icons.Outlined.AutoAwesome,Icons.Outlined.CleaningServices,Icons.Outlined.Translate,Icons.Outlined.TextFields)[i],null,Modifier.size(15.dp))})}}}
             item{InfoCard(Modifier.padding(horizontal=16.dp).fillMaxWidth()){Row{Text("交互式文稿",Modifier.weight(1f),fontWeight=FontWeight.Bold);Icon(Icons.Outlined.Undo,null,Modifier.clickable{editing=-1});Spacer(Modifier.width(12.dp));Icon(Icons.Outlined.Redo,null)};vm.captions.forEachIndexed{i,line->Row(Modifier.fillMaxWidth().clickable{editing=i;draft=line.text}.padding(vertical=9.dp),verticalAlignment=Alignment.Top){Text(line.time,color=if(editing==i)AiViolet else Muted,fontSize=9.sp,modifier=Modifier.width(42.dp));if(editing==i)OutlinedTextField(draft,{draft=it},Modifier.weight(1f),textStyle=LocalTextStyle.current.copy(fontSize=11.sp),trailingIcon={IconButton({vm.captions[i]=line.copy(text=draft);editing=-1}){Icon(Icons.Outlined.Check,null)}})else Text(line.text,Modifier.weight(1f).then(if(i==1)Modifier.border(1.dp,AiViolet,RoundedCornerShape(10.dp)).padding(8.dp)else Modifier),fontSize=11.sp)}}}}
         }
-        EditorBar(nav)
+        EditorBar(nav,Routes.CAPTIONS)
     }
 }
 
@@ -98,7 +100,24 @@ import com.harmony.moments.R
     }
 }
 
-@Composable fun ExportScreen(vm:MomentsViewModel,nav:NavHostController){var showShare by remember{mutableStateOf(false)};Column(Modifier.fillMaxSize().background(Canvas)){TopBar(EditorScreenTitle,{nav.popBackStack()});LazyColumn(Modifier.weight(1f),contentPadding=PaddingValues(16.dp),horizontalAlignment=Alignment.CenterHorizontally){item{Icon(Icons.Outlined.CheckCircle,null,tint=HarmonyBlue,modifier=Modifier.size(42.dp));Text("导出成功",Modifier.padding(8.dp),fontSize=20.sp,fontWeight=FontWeight.Bold);if(DemoMode)Text("演示模式 · AI 分析与导出为模拟效果",color=Muted,fontSize=10.sp)};item{InfoCard(Modifier.fillMaxWidth()){MediaImage(R.drawable.stitch_media_01,Modifier.fillMaxWidth().height(430.dp));Row(Modifier.padding(top=10.dp),verticalAlignment=Alignment.CenterVertically){Column(Modifier.weight(1f)){Text(vm.exportFileName(),fontSize=11.sp);Text("1080P · ${formatVideoClock(vm.videoLengthPref)}",color=Muted,fontSize=9.sp)};Surface(shape=CircleShape,color=Canvas){Text("124 MB",Modifier.padding(8.dp,4.dp),fontSize=9.sp)}}}};item{BlueButton("⇩  保存到相册",{},Modifier.padding(top=14.dp).fillMaxWidth())};item{Row(Modifier.padding(top=8.dp),horizontalArrangement=Arrangement.spacedBy(8.dp)){OutlinePill("◉ 查看作品",{nav.go(Routes.TASKS)},Modifier.weight(1f));OutlinePill("✎ 继续编辑",{nav.go(Routes.EDITOR)},Modifier.weight(1f))}};item{BlueButton("↗  分享作品",{showShare=true},Modifier.padding(top=14.dp).fillMaxWidth())}};ShareBottomSheet(showShare,{showShare=false})}
+@Composable fun ExportScreen(vm:MomentsViewModel,nav:NavHostController){
+    var showMenu by remember{mutableStateOf(false)}
+    Box(Modifier.fillMaxSize().background(Canvas)){
+        Column(Modifier.fillMaxSize()){
+            TopBar("导出成功",{nav.popBackStack()},menu={showMenu=true})
+            LazyColumn(Modifier.weight(1f),contentPadding=PaddingValues(16.dp),horizontalAlignment=Alignment.CenterHorizontally){
+                item{Icon(Icons.Outlined.CheckCircle,null,tint=HarmonyBlue,modifier=Modifier.size(42.dp));Text("导出成功",Modifier.padding(8.dp),fontSize=20.sp,fontWeight=FontWeight.Bold);if(DemoMode)Text("演示模式 · AI 分析与导出为模拟效果",color=Muted,fontSize=10.sp)}
+                item{InfoCard(Modifier.fillMaxWidth()){MediaImage(R.drawable.stitch_media_01,Modifier.fillMaxWidth().height(360.dp));Row(Modifier.padding(top=10.dp),verticalAlignment=Alignment.CenterVertically){Column(Modifier.weight(1f)){Text(vm.exportFileName(),fontSize=11.sp);Text("1080P · ${formatVideoClock(vm.videoLengthPref)}",color=Muted,fontSize=9.sp)};Surface(shape=CircleShape,color=Canvas){Text("124 MB",Modifier.padding(8.dp,4.dp),fontSize=9.sp)}}}}
+                item{BlueButton("⇩  保存到相册",{},Modifier.padding(top=14.dp).fillMaxWidth())}
+                item{TextButton({nav.popBackStack()},Modifier.fillMaxWidth().padding(top=8.dp)){Text("知道了",color=Muted,fontSize=13.sp)}}
+            }
+            Spacer(Modifier.navigationBarsPadding())
+        }
+        DropdownMenu(showMenu,{showMenu=false},modifier=Modifier.align(Alignment.TopEnd)){
+            DropdownMenuItem({Text("查看作品")},{showMenu=false;nav.go(Routes.TASKS)})
+            DropdownMenuItem({Text("继续编辑")},{showMenu=false;nav.go(Routes.EDITOR)})
+        }
+    }
 }
 
 private data class ChatMessage(val me:Boolean,val text:String)
@@ -112,7 +131,7 @@ private data class ChatMessage(val me:Boolean,val text:String)
         TopBar("AI 对话修改",{nav.popBackStack()})
         LazyColumn(Modifier.weight(1f).padding(16.dp),verticalArrangement=Arrangement.spacedBy(8.dp)){item{MediaImage(R.drawable.stitch_media_01,Modifier.fillMaxWidth().height(200.dp).clip(RoundedCornerShape(16.dp)))};items(messages){msg->ChatBubble(msg)}}
         Row(Modifier.padding(16.dp).fillMaxWidth().background(Color.White,CircleShape).padding(8.dp),verticalAlignment=Alignment.CenterVertically){TextField(prompt,{prompt=it},Modifier.weight(1f),placeholder={Text("例如：让结尾更温暖")},colors=TextFieldDefaults.colors(unfocusedContainerColor=Color.Transparent,focusedContainerColor=Color.Transparent,unfocusedIndicatorColor=Color.Transparent,focusedIndicatorColor=Color.Transparent));IconButton({if(prompt.isNotBlank()){messages.add(ChatMessage(true,prompt.trim()));messages.add(ChatMessage(false,"好的，我会按照「${prompt.trim()}」调整这支视频的剪辑。"));prompt=""}},Modifier.background(HarmonyBlue,CircleShape)){Icon(Icons.Outlined.ArrowUpward,null,tint=Color.White)}}
-        EditorBar(nav)
+        EditorBar(nav,Routes.AI_CHAT)
     }
 }
 
